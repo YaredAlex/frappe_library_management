@@ -29,7 +29,7 @@
    "in_list_view": 1,
    "label": "Member",
    "not_nullable": 1,
-   "options": "Member",
+   "options": "User",
    "reqd": 1
   },
   {
@@ -64,7 +64,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-12 21:36:41.944672",
+ "modified": "2025-07-13 20:58:58.360272",
  "modified_by": "Administrator",
  "module": "Library Management",
  "name": "Loan",
