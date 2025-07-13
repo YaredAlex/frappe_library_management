@@ -3,7 +3,7 @@ import type { Member } from "../types";
 import { useAuth } from "../context/AuthContext";
 import { MemberModal } from "../components/MemberModal";
 import { validateMember } from "../utils/validation";
-import { FRAPPE_API_URL } from "../utils/helper";
+import { ConfirmModal, FRAPPE_API_URL } from "../utils/helper";
 import Swal from "sweetalert2";
 import { useData } from "../context/DataContext";
 
@@ -24,7 +24,7 @@ export const Members = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this member?")) {
+    if (await ConfirmModal("Are you sure you want to delete this member?")) {
       const res = await deleteMember(id);
       if (res) {
         setMessage("Member deleted successfully!");
@@ -39,6 +39,8 @@ export const Members = () => {
       membership_id: "",
       email: "",
       phone: "",
+      first_name: "",
+      last_name: "",
     });
     setIsModalOpen(true);
     setFormErrors({});
@@ -46,14 +48,22 @@ export const Members = () => {
   };
   const addMember = async (newMember: Omit<Member, "name">) => {
     try {
-      const response = await fetch(`${FRAPPE_API_URL}/api/resource/Member`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newMember),
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${FRAPPE_API_URL}/api/method/library_management.api.user.create_user`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: newMember.email,
+            first_name: newMember.first_name,
+            last_name: newMember.last_name,
+            role: "Member",
+            password: newMember.password,
+            phone: newMember.phone,
+          }),
+          credentials: "include",
+        }
+      );
       const data = await response.json();
       console.log(data);
       if (data.exception) {
@@ -62,7 +72,7 @@ export const Members = () => {
         Swal.fire("Error", message, "error");
         return false;
       } else {
-        setMembers((prev) => [...prev, data.data]);
+        setMembers((prev) => [...prev, data.message]);
         return true;
       }
     } catch (error) {
@@ -75,7 +85,7 @@ export const Members = () => {
     try {
       const member = { ...updatedMember };
       const response = await fetch(
-        `${FRAPPE_API_URL}/api/resource/Member/${updatedMember.name}`,
+        `${FRAPPE_API_URL}/api/resource/User/${updatedMember.name}`,
         {
           method: "PUT",
           headers: {
@@ -108,7 +118,7 @@ export const Members = () => {
   const deleteMember = async (id: string) => {
     try {
       const response = await fetch(
-        `${FRAPPE_API_URL}/api/resource/Member/${id}`,
+        `${FRAPPE_API_URL}/api/resource/User/${id}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -148,7 +158,8 @@ export const Members = () => {
 
   if (
     !currentUser ||
-    (currentUser.role !== "librarian" && currentUser.role !== "admin")
+    (currentUser.role.toLocaleLowerCase() !== "librarian" &&
+      currentUser.role !== "admin")
   ) {
     return (
       <div className="container mx-auto p-6 bg-red-100 border border-red-400 text-red-700 rounded-xl shadow-lg mt-8 text-center">
@@ -189,31 +200,37 @@ export const Members = () => {
             </tr>
           </thead>
           <tbody className="text-gray-600 text-sm font-light">
-            {members.map((member) => (
+            {members?.map((member) => (
               <tr
                 key={member.name}
                 className="border-b border-gray-200 hover:bg-gray-100"
               >
-                <td className="py-3 px-6 text-left whitespace-nowrap">
-                  {member.full_name}
+                <td className="py-3 px-6 text-left whitespace-nowrap capitalize">
+                  {member?.first_name} {member?.last_name}
                 </td>
-                <td className="py-3 px-6 text-left">{member.membership_id}</td>
-                <td className="py-3 px-6 text-left">{member.email}</td>
-                <td className="py-3 px-6 text-left">{member.phone}</td>
+                <td className="py-3 px-6 text-left">{member?.name}</td>
+                <td className="py-3 px-6 text-left">{member?.email}</td>
+                <td className="py-3 px-6 text-left">{member?.phone}</td>
                 <td className="py-3 px-6 text-center">
                   <div className="flex item-center justify-center space-x-2">
                     <button
                       onClick={() => handleEdit(member)}
-                      className="w-8 h-8 rounded-full bg-yellow-400 text-white flex items-center justify-center hover:bg-yellow-500 transition duration-200"
+                      className="w-8 h-8 rounded-full text-white flex items-center justify-center hover:bg-yellow-500 transition duration-200"
                       title="Edit"
                     >
                       <svg
-                        className="w-5 h-5"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
                         xmlns="http://www.w3.org/2000/svg"
+                        className="w-5 h-5 text-gray-600 hover:text-blue-600 transition"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
                       >
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-9.192 7.071a1 1 0 000 1.414L9.172 17l5.071-5.071-4.243-4.243-5.657 5.657z"></path>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"
+                        />
                       </svg>
                     </button>
                     <button
@@ -250,13 +267,15 @@ export const Members = () => {
             const errors = validateMember(memberData);
             if (Object.keys(errors).length > 0) {
               setFormErrors(errors);
+              console.log(errors);
               return false;
             }
             if ("name" in memberData && memberData.name) {
               const res = await updateMember(memberData as Member);
               if (res) setMessage("Member updated successfully!");
             } else {
-              const res = await addMember(memberData as Omit<Member, "id">);
+              console.log("adding memeber");
+              const res = await addMember(memberData as Omit<Member, "name">);
               if (res) setMessage("Member added successfully!");
             }
             setTimeout(() => setMessage(""), 3000);
