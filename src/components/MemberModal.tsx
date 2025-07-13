@@ -40,23 +40,48 @@ export const MemberModal = ({
               htmlFor="name"
               className="block text-gray-700 text-sm font-bold mb-2"
             >
-              Name
+              First Name
             </label>
             <input
               type="text"
-              id="name"
-              name="full_name"
-              value={formData.full_name}
+              id="first_name"
+              name="first_name"
+              value={formData.first_name}
               onChange={handleChange}
               className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                formErrors.name ? "border-red-500" : ""
+                formErrors.first_name ? "border-red-500" : ""
               }`}
             />
-            {formErrors.name && (
-              <p className="text-red-500 text-xs italic">{formErrors.name}</p>
+            {formErrors.first_name && (
+              <p className="text-red-500 text-xs italic">
+                {formErrors.first_name}
+              </p>
             )}
           </div>
           <div className="mb-4">
+            <label
+              htmlFor="name"
+              className="block text-gray-700 text-sm font-bold mb-2"
+            >
+              Last Name
+            </label>
+            <input
+              type="text"
+              id="last_name"
+              name="last_name"
+              value={formData.last_name}
+              onChange={handleChange}
+              className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                formErrors.last_name ? "border-red-500" : ""
+              }`}
+            />
+            {formErrors.last_name && (
+              <p className="text-red-500 text-xs italic">
+                {formErrors.last_name}
+              </p>
+            )}
+          </div>
+          {/* <div className="mb-4">
             <label
               htmlFor="membershipId"
               className="block text-gray-700 text-sm font-bold mb-2"
@@ -78,7 +103,7 @@ export const MemberModal = ({
                 {formErrors.membershipId}
               </p>
             )}
-          </div>
+          </div> */}
           <div className="mb-4">
             <label
               htmlFor="email"
@@ -121,6 +146,32 @@ export const MemberModal = ({
               <p className="text-red-500 text-xs italic">{formErrors.phone}</p>
             )}
           </div>
+          {!("name" in member) && (
+            <div className="mb-6">
+              <label
+                htmlFor="phone"
+                className="block text-gray-700 text-sm font-bold mb-2"
+              >
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                  formErrors.password ? "border-red-500" : ""
+                }`}
+              />
+              {formErrors.password && (
+                <p className="text-red-500 text-xs italic">
+                  {formErrors.password}
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="flex items-center justify-between">
             <button
               type="submit"
