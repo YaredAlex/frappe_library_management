@@ -2,10 +2,10 @@
 
 A full-stack **Library Management System** built with:
 
-- 🧠 **Frappe** (Python) as the backend (custom DocTypes, REST API, and role-based permissions)
-- ⚛️ **React** (TypeScript) as the frontend (custom standalone UI)
+- **Frappe** (Python) as the backend (custom DocTypes, REST API, and role-based permissions)
+- **React** (TypeScript) as the frontend (custom standalone UI)
 
-> The backend code is available in the `dev` branch, and the frontend (React UI) is available in the `ui` branch. This project enables book and member management, book loan tracking, reservation handling, overdue notifications, and full role-based access control, all via a custom React interface — separate from the default Frappe Desk.
+> The backend code is available in the `dev` branch, and the frontend (React UI) is available in the `ui` branch.
 
 ---
 
@@ -48,5 +48,4 @@ npm run dev
 ```
 
 ### License
-
 mit
