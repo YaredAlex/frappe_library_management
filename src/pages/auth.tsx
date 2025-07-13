@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import type { User } from "../types";
 import { checkSession, FRAPPE_API_URL } from "../utils/helper";
+import { useNavigate } from "react-router-dom";
 
 export const Auth = () => {
   const { setCurrentUser } = useAuth();
@@ -9,13 +10,13 @@ export const Auth = () => {
   const [password, setPassword] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
+  const navigate = useNavigate();
   const getDetail = async (email: string) => {
     const response = await fetch(
-      `${FRAPPE_API_URL}/api/resource/User/${email}`,
+      `${FRAPPE_API_URL}/api/method/library_management.api.user.user_details?email=${email}`,
       { method: "GET", credentials: "include" }
     );
-    return response.json();
+    return await response.json();
   };
 
   useEffect(() => {
@@ -49,20 +50,28 @@ export const Auth = () => {
 
       if (response.ok) {
         const detail = await getDetail(username);
-        const role: User["role"] =
-          detail.data["user_type"] === "System User"
-            ? "admin"
-            : detail["user_type"] ?? "member";
-
+        console.log(detail);
+        let role: User["role"] = "member";
+        if (
+          detail.message["roles"].find((e: string) => e === "Administrator")
+        ) {
+          role = "admin";
+        } else if (
+          detail.message["roles"].find((e: string) => e === "Librarian")
+        )
+          role = "librarian";
         setCurrentUser({
           name: username,
-          username: detail.data.full_name,
-          role,
+          username: detail.message.username,
+          role: role.toLocaleLowerCase() as User["role"],
         });
+
         return true;
       } else {
         const errorData = await response.json();
         console.error("Frappe login failed:", errorData);
+        setMessage(errorData.message);
+        setTimeout(() => setMessage(""), 3000);
         return false;
       }
     } catch (error) {
@@ -78,9 +87,8 @@ export const Auth = () => {
     const success = await login(username, password);
     setIsLoading(false);
 
-    if (!success) {
-      setMessage("Invalid username or password. Please try again.");
-      setTimeout(() => setMessage(""), 3000);
+    if (success) {
+      navigate("/books");
     }
   };
 
@@ -88,7 +96,7 @@ export const Auth = () => {
     <div className="flex items-center justify-center min-h-[calc(100vh-180px)] p-6">
       <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md border border-blue-200">
         <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-          Login to Library Hub
+          Login to Library
         </h2>
         {message && (
           <div
@@ -151,12 +159,7 @@ export const Auth = () => {
           <span className="font-semibold">
             Demo Accounts (for local simulation):
           </span>
-          <br />
-          Librarian: user/pass (role: librarian)
-          <br />
-          Member: member/pass (role: member)
-          <br />
-          Admin: admin/pass (role: admin)
+          Admin: administrator/admin@123 (role: admin)
         </p>
       </div>
     </div>
