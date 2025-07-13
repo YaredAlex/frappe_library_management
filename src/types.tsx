@@ -5,15 +5,18 @@ export interface Book {
   publish_date?: string;
   isbn?: string;
   is_available: boolean;
-  reservedBy?: string[];
+  reserved_by?: Member[];
 }
 
 export interface Member {
   full_name: string;
   name: string;
-  membership_id: string;
+  membership_id?: string;
   email: string;
   phone: string;
+  first_name?: string;
+  last_name?: string;
+  password?: string;
 }
 
 export interface Loan {
