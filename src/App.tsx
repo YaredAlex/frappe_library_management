@@ -16,7 +16,6 @@ import { Register } from "./pages/register";
 import { Header } from "./components/Header";
 import { AuthContext } from "./context/AuthContext";
 import { DataContext } from "./context/DataContext";
-import { Footer } from "./components/Footer";
 import "./App.css";
 import { FRAPPE_API_URL } from "./utils/helper";
 import { LoadingScreen } from "./components/Loading";
@@ -29,7 +28,18 @@ const AppRoutes = ({ currentUser }: { currentUser: User | null }) => {
         element={<Navigate to={currentUser ? "/books" : "/auth"} />}
       />
       <Route path="/auth" element={<Auth />} />
-      <Route path="/register" element={<Register />} />
+      <Route
+        path="/register"
+        element={
+          currentUser &&
+          (currentUser.role === "admin" ||
+            currentUser.role === "System User") ? (
+            <Register />
+          ) : (
+            <NotFound />
+          )
+        }
+      />
       <Route
         path="/books"
         element={currentUser ? <Books /> : <Navigate to="/auth" />}
@@ -135,11 +145,26 @@ const App = () => {
               <LoadingScreen />
             ) : (
               <>
-                <Header />
-                <main className="flex-grow container mx-auto p-4">
-                  <AppRoutes currentUser={currentUser} />
-                </main>
-                <Footer />
+                <div className="flex h-screen">
+                  {/* Sidebar */}
+                  <div className="w-64 bg-gray-800 text-white">
+                    <Header />
+                  </div>
+
+                  {/* Main Content */}
+                  <div className="flex flex-col flex-grow overflow-hidden border-l">
+                    <main className="flex-grow overflow-auto p-4 max-w-full">
+                      <div className="container mx-auto">
+                        <AppRoutes currentUser={currentUser} />
+                      </div>
+                    </main>
+
+                    {/* Optional Footer (can be sticky or scroll with content) */}
+                    {/* <div className="mt-auto border-t p-4">
+        <Footer />
+      </div> */}
+                  </div>
+                </div>
               </>
             )}
           </DataContext.Provider>
