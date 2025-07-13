@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "hash",
  "creation": "2025-07-11 10:07:15.049261",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -9,7 +10,8 @@
   "member",
   "loan_date",
   "return_date",
-  "returned"
+  "returned",
+  "returned_date"
  ],
  "fields": [
   {
@@ -24,36 +26,49 @@
   {
    "fieldname": "member",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Member",
    "not_nullable": 1,
    "options": "Member",
    "reqd": 1
   },
   {
+   "default": "Today",
    "fieldname": "loan_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Loan Date",
    "reqd": 1
   },
   {
+   "fetch_if_empty": 1,
    "fieldname": "return_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Return Date"
   },
   {
    "default": "0",
    "fieldname": "returned",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Returned"
+  },
+  {
+   "fieldname": "returned_date",
+   "fieldtype": "Date",
+   "label": "Returned Date",
+   "placeholder": "date"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-11 10:11:14.306409",
+ "modified": "2025-07-12 21:36:41.944672",
  "modified_by": "Administrator",
  "module": "Library Management",
  "name": "Loan",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {
