@@ -1,0 +1,36 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:reserved_by",
+ "creation": "2025-07-13 20:54:15.210080",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "reserved_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "reserved_by",
+   "fieldtype": "Link",
+   "label": "Reserved By",
+   "options": "User",
+   "unique": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-13 20:55:15.126574",
+ "modified_by": "Administrator",
+ "module": "Library Management",
+ "name": "Reserves",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
