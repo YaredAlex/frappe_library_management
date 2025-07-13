@@ -1,6 +1,29 @@
-### Library Management
+# 📚 Library Management System
 
-manage books
+A full-stack **Library Management System** built with:
+
+- 🧠 **Frappe** (Python) as the backend (custom DocTypes, REST API, and role-based permissions)
+- ⚛️ **React** (TypeScript) as the frontend (custom standalone UI)
+
+> The backend code is available in the `dev` branch, and the frontend (React UI) is available in the `ui` branch. This project enables book and member management, book loan tracking, reservation handling, overdue notifications, and full role-based access control, all via a custom React interface — separate from the default Frappe Desk.
+
+---
+
+## Features Overview
+
+- **Book Management** – Librarians can create, view, edit, and delete books (title, author, ISBN, publish date).
+- **Member Management** – Librarians can manage members with full_name, membership ID, email, and phone.
+- **Loan Creation** – Books can be loaned to members with proper tracking of loan and return dates.
+- **Availability Check** – Prevents duplicate loans by ensuring a book is available before lending.
+- **Reservation Queue** – Members can reserve books that are currently on loan; the system manages a queue.
+- **Overdue Notifications** – Automatically emails members when their book loans become overdue.
+- **Reports** – Generate reports of all books currently on loan and all overdue books.
+- **REST API** – A secure set of REST API endpoints supports external integration and full CRUD operations.
+- **Authentication and Roles** – Users can log in with specific roles: admin, librarian, or member.
+- **Custom Frontend UI** – Built entirely in React, the frontend is independent of Frappe Desk and provides a modern user interface.
+
+
+### Library Management
 
 ### Installation
 
@@ -12,28 +35,17 @@ bench get-app $URL_OF_THIS_REPO --branch dev
 bench install-app library_management
 ```
 
-### Contributing
-
-This app uses `pre-commit` for code formatting and linting. Please [install pre-commit](https://pre-commit.com/#installation) and enable it for this repository:
-
+### UI Installation
 ```bash
-cd apps/library_management
-pre-commit install
+git clone git@github.com:YaredAlex/frappe_library_management.git
+git checkout ui
+cd frontend
+
+# Dependancy Installation
+
+npm install
+npm run dev
 ```
-
-Pre-commit is configured to use the following tools for checking and formatting your code:
-
-- ruff
-- eslint
-- prettier
-- pyupgrade
-### CI
-
-This app can use GitHub Actions for CI. The following workflows are configured:
-
-- CI: Installs this app and runs unit tests on every push to `develop` branch.
-- Linters: Runs [Frappe Semgrep Rules](https://github.com/frappe/semgrep-rules) and [pip-audit](https://pypi.org/project/pip-audit/) on every pull request.
-
 
 ### License
 
