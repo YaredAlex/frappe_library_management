@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "hash",
+ "autoname": "format:{full_name.##}",
  "creation": "2025-07-11 09:42:13.472832",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -43,11 +43,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-11 09:57:54.594722",
+ "modified": "2025-07-12 22:30:16.697343",
  "modified_by": "Administrator",
  "module": "Library Management",
  "name": "Member",
- "naming_rule": "Random",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
