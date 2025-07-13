@@ -9,13 +9,32 @@ export const validateBook = (book: Omit<Book, 'name' | 'is_available' | 'reserve
   return errors;
 };
 
-export const validateMember = (member: Omit<Member, 'name'>): { [key: string]: string } => {
+export const validateMember = (member:Partial<Omit<Member, 'name'>> & { name?: string }): { [key: string]: string } => {
   const errors: { [key: string]: string } = {};
-  if (!member.full_name.trim()) errors.name = 'Name is required.';
-  if (!member.membership_id.trim()) errors.membershipId = 'Membership ID is required.';
-  if (!member.email.trim()) errors.email = 'Email is required.';
-  if (!/\S+@\S+\.\S+/.test(member.email)) errors.email = 'Email is invalid.';
-  if (!member.phone.trim()) errors.phone = 'Phone is required.';
+  if (!member.first_name?.trim()) {
+    errors.first_name = 'First name is required.';
+  }
+
+  if (!member.last_name?.trim()) {
+    errors.last_name = 'Last name is required.';
+  }
+
+  if (!member.email?.trim()) {
+    errors.email = 'Email is required.';
+  } else if (!/\S+@\S+\.\S+/.test(member.email)) {
+    errors.email = 'Email is invalid.';
+  }
+
+  if (!member.phone?.trim()) {
+    errors.phone = 'Phone is required.';
+  }
+
+  if (!member.name && !member.password?.trim()) {
+    errors.password = 'Password is required.';
+  }
+  else if(!member.name && member.password!.trim().length < 6){
+     errors.password = 'Minimun password is length should be 6.';
+  }
   return errors;
 };
 
