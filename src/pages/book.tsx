@@ -4,7 +4,7 @@ import type { Book } from "../types";
 import { BookModal } from "../components/BookModal";
 import { validateBook } from "../utils/validation";
 import { NotFound } from "./not_found";
-import { FRAPPE_API_URL, getCSRFToken } from "../utils/helper";
+import { ConfirmModal, FRAPPE_API_URL, getCSRFToken } from "../utils/helper";
 import Swal from "sweetalert2";
 import { useData } from "../context/DataContext";
 
@@ -12,7 +12,7 @@ export const Books = () => {
   const { currentUser } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [currentBook, setCurrentBook] = useState<
-    Book | Omit<Book, "name" | "is_available" | "reservedBy"> | null
+    Book | Omit<Book, "name" | "is_available" | "reserved_by"> | null
   >(null);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [message, setMessage] = useState<string>("");
@@ -25,7 +25,7 @@ export const Books = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this book?")) {
+    if (await ConfirmModal("Do you really want to delete this book?")) {
       const res = await deleteBook(id);
       if (res) {
         setMessage("Book deleted successfully!");
@@ -41,15 +41,16 @@ export const Books = () => {
     setMessage("");
   };
 
-  const handleReserve = (bookId: string) => {
+  const handleReserve = async (bookId: string) => {
     if (!currentUser) {
       setMessage("Please log in to reserve a book.");
       setTimeout(() => setMessage(""), 3000);
       return;
     }
-    createReservation(bookId, currentUser.name);
-    setMessage("Book reserved successfully!");
-    setTimeout(() => setMessage(""), 3000);
+    if (await createReservation(bookId, currentUser.name)) {
+      setMessage("Book reserved successfully!");
+      setTimeout(() => setMessage(""), 3000);
+    }
   };
   const addBook = async (
     newBook: Omit<Book, "name" | "is_available" | "reservedBy">
@@ -112,7 +113,7 @@ export const Books = () => {
       const data = await res.json();
       if (data.exception) {
         const message: string = data.exception.split(":")[1];
-        Swal.fire("Error", message, "error");
+        Swal.fire("Error", message || "Error occured", "error");
         return false;
       } else {
         setBooks((prev) => prev.map((b) => (b.name === book.name ? book : b)));
@@ -148,16 +149,35 @@ export const Books = () => {
     return false;
   };
   const createReservation = async (bookId: string, memberId: string) => {
-    setBooks((prevBooks) =>
-      prevBooks.map((book) =>
-        book.name === bookId
-          ? {
-              ...book,
-              reservedBy: [...new Set([...(book.reservedBy ?? []), memberId])],
-            }
-          : book
-      )
-    );
+    try {
+      const response = await fetch(
+        `${FRAPPE_API_URL}/api/method/library_management.api.book.reserve_book`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ book_id: bookId, user_id: memberId }),
+        }
+      );
+      const data = await response.json();
+      if (data.exception || data.exc_type) {
+        const message: string =
+          data.exception?.split(":")[1] || "Error occured";
+        if (data.exc_type) {
+          const messages = JSON.parse(data._server_messages);
+          const firstMessage = JSON.parse(messages[0]);
+          Swal.fire("Error", firstMessage.message, "error");
+        } else Swal.fire("Error", message, "error");
+        return false;
+      } else {
+        await fetchBooks();
+        return true;
+      }
+    } catch (error) {
+      console.error("Error reserving book:", error);
+    }
     return false;
   };
 
@@ -168,6 +188,7 @@ export const Books = () => {
         { method: "GET", credentials: "include" }
       );
       const data = await response.json();
+      console.log(data);
       setBooks(data.message);
     } catch (error) {
       console.error("Error fetching books:", error);
@@ -214,7 +235,7 @@ export const Books = () => {
             </tr>
           </thead>
           <tbody className="text-gray-600 text-sm font-light">
-            {books.map((book) => (
+            {books?.map((book) => (
               <tr
                 key={book.name}
                 className="border-b border-gray-200 hover:bg-gray-100"
@@ -235,9 +256,9 @@ export const Books = () => {
                   >
                     {book.is_available ? "Available" : "On Loan"}
                   </span>
-                  {book.reservedBy && book.reservedBy.length > 0 && (
+                  {book.reserved_by && book.reserved_by.length > 0 && (
                     <span className="ml-2 px-3 py-1 rounded-full text-xs font-semibold bg-yellow-200 text-yellow-800">
-                      Reserved ({book.reservedBy.length})
+                      Reserved ({book.reserved_by.length})
                     </span>
                   )}
                 </td>
@@ -248,16 +269,22 @@ export const Books = () => {
                       <>
                         <button
                           onClick={() => handleEdit(book)}
-                          className="w-8 h-8 rounded-full bg-yellow-400 text-white flex items-center justify-center hover:bg-yellow-500 transition duration-200"
+                          className="w-8 h-8 rounded-full  text-white flex items-center justify-center hover:bg-yellow-500 transition duration-200"
                           title="Edit"
                         >
                           <svg
-                            className="w-5 h-5"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
                             xmlns="http://www.w3.org/2000/svg"
+                            className="w-5 h-5 text-gray-600 hover:text-blue-600 transition"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
                           >
-                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-9.192 7.071a1 1 0 000 1.414L9.172 17l5.071-5.071-4.243-4.243-5.657 5.657z"></path>
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"
+                            />
                           </svg>
                         </button>
                         <button
