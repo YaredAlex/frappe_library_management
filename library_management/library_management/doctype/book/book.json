@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:title",
  "creation": "2025-07-10 14:57:56.215474",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -9,7 +10,7 @@
   "author",
   "publish_date",
   "isbn",
-  "status"
+  "is_available"
  ],
  "fields": [
   {
@@ -17,7 +18,9 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Title",
-   "reqd": 1
+   "not_nullable": 1,
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "author",
@@ -36,9 +39,9 @@
   },
   {
    "default": "Available",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
+   "fieldname": "is_available",
+   "fieldtype": "Check",
+   "label": "Is Available",
    "options": "Available\nOn Loan",
    "reqd": 1,
    "sort_options": 1
@@ -47,10 +50,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-10 15:06:15.124315",
+ "modified": "2025-07-11 21:27:30.661430",
  "modified_by": "Administrator",
  "module": "Library Management",
  "name": "Book",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
