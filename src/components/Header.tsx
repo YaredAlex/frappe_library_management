@@ -1,19 +1,30 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { FRAPPE_API_URL } from "../utils/helper";
 
 export const Header = () => {
   const { currentUser, setCurrentUser } = useAuth();
-  const location = useLocation();
-  const currentPath = location.pathname;
 
+  const navigate = useNavigate();
   const logout = async () => {
     try {
       await fetch(`${FRAPPE_API_URL}/api/method/logout`, {
         method: "POST",
         credentials: "include",
       });
+
+      localStorage.clear();
+      sessionStorage.clear();
+
+      document.cookie.split(";").forEach((cookie) => {
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        document.cookie =
+          name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+      });
+
+      navigate("/auth");
     } catch (error) {
       console.error("Error during Frappe logout:", error);
     } finally {
@@ -26,12 +37,12 @@ export const Header = () => {
   };
 
   return (
-    <header className="bg-gradient-to-r from-blue-600 to-indigo-700 p-4 shadow-lg rounded-b-xl">
-      <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-3xl font-extrabold text-white tracking-wide">
-          Library Hub
-        </h1>
-        <nav className="space-x-4 flex flex-wrap items-center">
+    <header className="">
+      <div className="container mx-auto flex flex-col justify-between items-center">
+        <h2 className="text-2xl font-bold  tracking-wide">
+          Library Management
+        </h2>
+        <nav className="space-x-4 flex flex-col gap-2 justify-start mt-10">
           {currentUser && (
             <>
               {(currentUser.role === "librarian" ||
@@ -41,6 +52,7 @@ export const Header = () => {
                   <NavLink to="/members">Members</NavLink>
                   <NavLink to="/loans">Loans</NavLink>
                   <NavLink to="/reports">Reports</NavLink>
+                  <NavLink to="/register">Register</NavLink>
                 </>
               )}
               {currentUser.role === "member" && (
@@ -59,8 +71,9 @@ export const Header = () => {
           )}
           {!currentUser && (
             <>
-              <NavLink to="/auth">Login</NavLink>
-              <NavLink to="/register">Register</NavLink>
+              <div className="mt-auto" style={{ marginTop: "auto" }}>
+                <NavLink to="/auth">Login</NavLink>
+              </div>
             </>
           )}
         </nav>
@@ -81,10 +94,10 @@ const NavLink = ({ to, children }: NavLinkProps) => {
   return (
     <Link
       to={to}
-      className={`px-4 py-2 rounded-lg font-semibold transition duration-300 ease-in-out transform hover:scale-105 ${
+      className={`block px-4 py-2 rounded-lg font-medium transition duration-200 ${
         isActive
-          ? "bg-white text-blue-700 shadow-md"
-          : "text-white hover:bg-blue-500 hover:bg-opacity-30"
+          ? "bg-blue-600 text-white shadow-md"
+          : "text-white hover:bg-gray-700"
       }`}
     >
       {children}
