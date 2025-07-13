@@ -1,3 +1,4 @@
+import Swal from "sweetalert2";
 import type { User } from "../types";
 
 export   const FRAPPE_API_URL = "http://localhost:8000";
@@ -43,3 +44,19 @@ export function getCSRFToken() {
   const match = document.cookie.match(/csrftoken=([^;]+)/);
   return match ? decodeURIComponent(match[1]) : "";
 }
+
+
+export const ConfirmModal = async (message:string) => {
+  const result = await Swal.fire({
+    title: "Are you sure?",
+    text: message,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes",
+    cancelButtonText: "Cancel",
+  });
+
+  return result.isConfirmed
+};
