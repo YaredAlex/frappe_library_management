@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import type { Loan } from "../types";
 import { validateLoan } from "../utils/validation";
-import { formatDate, FRAPPE_API_URL } from "../utils/helper";
+import { ConfirmModal, formatDate, FRAPPE_API_URL } from "../utils/helper";
 import { NotFound } from "./not_found";
 import { useData } from "../context/DataContext";
 import Swal from "sweetalert2";
@@ -50,7 +50,9 @@ export const Loans = () => {
   };
 
   const handleReturnLoan = async (loanId: string) => {
-    if (confirm("Are you sure you want to mark this loan as returned?")) {
+    if (
+      await ConfirmModal("Are you sure you want to mark this loan as returned?")
+    ) {
       const res = await returnLoan(loanId);
       if (res) {
         setMessage("Book returned successfully!");
@@ -59,21 +61,53 @@ export const Loans = () => {
     }
   };
   const cancelReservation = async (bookId: string, memberId: string) => {
-    setBooks((prevBooks) =>
-      prevBooks.map((book) =>
-        book.name === bookId
-          ? {
-              ...book,
-              reservedBy: book.reservedBy?.filter((id) => id !== memberId),
-            }
-          : book
-      )
-    );
+    try {
+      const response = await fetch(
+        `${FRAPPE_API_URL}/api/method/library_management.api.book.cancel_reservation`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ book_id: bookId, user_id: memberId }),
+        }
+      );
+      const data = await response.json();
+      if (data.exception || data.exc_type) {
+        const message: string =
+          data.exception?.split(":")[1] || "Error occured";
+        if (data.exc_type) {
+          const messages = JSON.parse(data._server_messages);
+          const firstMessage = JSON.parse(messages[0]);
+          Swal.fire("Error", firstMessage.message, "error");
+        } else Swal.fire("Error", message, "error");
+        return false;
+      } else {
+        setBooks((prevBooks) =>
+          prevBooks.map((book) =>
+            book.name === bookId
+              ? {
+                  ...book,
+                  reserved_by: book.reserved_by?.filter(
+                    (e) => e.name !== memberId
+                  ),
+                }
+              : book
+          )
+        );
+        return true;
+      }
+    } catch (error) {
+      console.error("Error reserving book:", error);
+    }
+
     return false;
   };
-  const handleCancelReservation = (bookId: string, memberId: string) => {
-    // NOTE: In a real application, replace window.confirm with a custom modal UI.
-    if (confirm("Are you sure you want to cancel this reservation?")) {
+  const handleCancelReservation = async (bookId: string, memberId: string) => {
+    if (
+      await ConfirmModal("Are you sure you want to cancel this reservation?")
+    ) {
       cancelReservation(bookId, memberId);
       setMessage("Reservation cancelled successfully!");
       setTimeout(() => setMessage(""), 3000);
@@ -184,7 +218,8 @@ export const Loans = () => {
     currentUser.role === "member"
       ? books.filter(
           (book) =>
-            book.reservedBy && book.reservedBy.includes(currentUser.name)
+            book.reserved_by &&
+            book.reserved_by.find((e) => e.name === currentUser.name)
         )
       : [];
 
