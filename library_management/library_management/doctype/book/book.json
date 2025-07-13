@@ -10,7 +10,8 @@
   "author",
   "publish_date",
   "isbn",
-  "is_available"
+  "is_available",
+  "reserved_by"
  ],
  "fields": [
   {
@@ -45,12 +46,18 @@
    "options": "Available\nOn Loan",
    "reqd": 1,
    "sort_options": 1
+  },
+  {
+   "fieldname": "reserved_by",
+   "fieldtype": "Table MultiSelect",
+   "label": "Reserved By",
+   "options": "Reserves"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-11 21:27:30.661430",
+ "modified": "2025-07-13 20:55:49.998155",
  "modified_by": "Administrator",
  "module": "Library Management",
  "name": "Book",
